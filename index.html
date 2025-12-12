@@ -707,24 +707,17 @@
         // 4. FUNÇÕES DE PERSISTÊNCIA (FIREBASE)
         // ----------------------------------------------------------------------
         
-        async function loadData() {
-            // ... (A lógica de loadData permanece inalterada)
+      async function loadData() {
             try {
                 const docRef = doc(db, COLLECTION_NAME, DOC_PATH);
                 const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    motoristasCadastrados = data.motoristas || [];
-                    viagensCadastradas = data.viagens || [];
-                } else {
-                    console.log("Documento não encontrado. Criando estrutura inicial.");
-                    await setDoc(docRef, { motoristas: [], viagens: [] });
-                }
-                updateMotoristasList();
+                // ... (seu código de sucesso aqui) ...
+
             } catch (e) {
                 console.error("Erro ao carregar dados:", e);
-                alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança.");
+                // COMENTAR/REMOVER ESTA LINHA:
+                // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); 
             }
         }
         
@@ -967,3 +960,4 @@
     </script>
 </body>
 </html>
+
