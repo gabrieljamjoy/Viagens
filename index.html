@@ -708,7 +708,7 @@
             } catch (e) {
                 console.error("Erro ao carregar dados:", e);
                 // Mantemos o alerta caso o usuário tenha um erro de API/Credenciais
-                alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança.");
+                // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); 
             }
         }
         
@@ -834,20 +834,206 @@
             
             updateFormLabels(); 
 
+            // Preenche os campos dos trechos
+            // Garantir que a lista de motoristas esteja atualizada (chamado em loadData)
             viagem.trechos.forEach((trecho, index) => {
                 const num = index + 1;
-                document.getElementById(`motorista${num}`).value = trecho.motorista;
-                document.getElementById(`inicio${num}`).value = trecho.inicio;
-                document.getElementById(`fim${num}`).value = trecho.fim;
+                const motoristaSelect = document.getElementById(`motorista${num}`);
+                const inicioInput = document.getElementById(`inicio${num}`);
+                const fimInput = document.getElementById(`fim${num}`);
+                
+                if (motoristaSelect) motoristaSelect.value = trecho.motorista;
+                if (inicioInput) inicioInput.value = trecho.inicio;
+                if (fimInput) fimInput.value = trecho.fim;
             });
+
             
-            document.getElementById('detalhesModal').style.display = 'none';
+            // Oculta o modal de detalhes caso estivesse aberto
+            const detalhesModal = document.getElementById('detalhesModal');
+            if (detalhesModal) detalhesModal.style.display = 'none';
+            
+            // Rola para o formulário de edição
             document.getElementById('cadastro-viagens').scrollIntoView({ behavior: 'smooth' });
         }
         
-        // Funções Placeholder
-        async function gerarRelatorio() { alert("Função Gerar Relatório de Horas será implementada em breve."); }
-        async function gerarRelatorioGeralViaForm() { alert("Função Visualizar Viagens (Cards) será implementada em breve."); }
+        async function excluirViagem(viagemId) {
+            if (confirm("Tem certeza que deseja EXCLUIR permanentemente esta viagem?")) {
+                const index = viagensCadastradas.findIndex(v => v.id === viagemId);
+                
+                if (index !== -1) {
+                    viagensCadastradas.splice(index, 1);
+                    if (await saveDataToFirestore()) {
+                        alert("Viagem excluída com sucesso.");
+                        // Recarrega o relatório para refletir a exclusão imediatamente
+                        gerarRelatorioGeralViaForm();
+                    }
+                } else {
+                    alert("Viagem não encontrada.");
+                }
+            }
+        }
+        
+        async function gerarRelatorioHoras() {
+            const relatoriosDiv = document.getElementById('relatorios');
+            relatoriosDiv.innerHTML = ''; // Limpa relatórios anteriores
+            
+            // 1. Coleta o Mês/Ano do filtro
+            const mesAnoInput = document.getElementById('mesAno').value;
+            if (!mesAnoInput) {
+                relatoriosDiv.innerHTML = '<p style="color: red; text-align: center;">Selecione o Mês e Ano para gerar o relatório.</p>';
+                return;
+            }
+            const [ano, mes] = mesAnoInput.split('-');
+
+            const motoristaHours = {};
+            let totalViagensFiltradas = 0;
+
+            // 2. Filtra as viagens pelo Mês/Ano selecionado
+            const viagensFiltradas = viagensCadastradas.filter(v => {
+                // A data da viagem está no formato YYYY-MM-DD
+                return v.data.startsWith(`${ano}-${mes}`);
+            });
+            
+            totalViagensFiltradas = viagensFiltradas.length;
+
+            if (totalViagensFiltradas === 0) {
+                 relatoriosDiv.innerHTML = `<p style="text-align: center; color: #6c757d;">Não há viagens registradas em ${formatMonthYear(mesAnoInput)}.</p>`;
+                 return;
+            }
+
+            // 3. Processa cada trecho e acumula as horas por motorista
+            viagensFiltradas.forEach(viagem => {
+                viagem.trechos.forEach(trecho => {
+                    const nomeMotorista = trecho.motorista;
+                    const totalHours = parseFloat(trecho.totalHours || 0);
+                    // const nightHours = parseFloat(trecho.nightHours || 0); // Implementação futura
+
+                    if (!motoristaHours[nomeMotorista]) {
+                        motoristaHours[nomeMotorista] = { total: 0, noturna: 0, viagens: 0 };
+                    }
+
+                    motoristaHours[nomeMotorista].total += totalHours;
+                    motoristaHours[nomeMotorista].viagens += 1;
+                    // motoristaHours[nomeMotorista].noturna += nightHours; // Implementação futura
+                });
+            });
+
+            // 4. Cria a Tabela de Exibição
+            let tableHTML = `
+                <caption>Relatório de Horas Trabalhadas - ${formatMonthYear(mesAnoInput)} (${totalViagensFiltradas} Viagens)</caption>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Motorista</th>
+                            <th>Total de Horas (hh:mm)</th>
+                            <th>Horas Noturnas (hh:mm)</th>
+                            <th>Total de Viagens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            for (const motorista in motoristaHours) {
+                const totalHours = motoristaHours[motorista].total;
+                const totalViagens = motoristaHours[motorista].viagens;
+                
+                // Conversão de horas decimais para hh:mm
+                const totalMinutes = Math.round(totalHours * 60);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const hoursFormatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+
+                tableHTML += `
+                    <tr>
+                        <td>${motorista}</td>
+                        <td>${hoursFormatted}</td>
+                        <td class="night-hours">00:00</td> 
+                        <td>${totalViagens}</td>
+                    </tr>
+                `;
+            }
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            relatoriosDiv.innerHTML = tableHTML;
+        }
+
+
+        // Substitui o placeholder e implementa a visualização em cards
+        async function gerarRelatorioGeralViaForm() {
+            const relatoriosDiv = document.getElementById('relatorios');
+            relatoriosDiv.innerHTML = ''; // Limpa relatórios anteriores
+            
+            const mesAnoInput = document.getElementById('mesAno').value;
+            let viagensFiltradas = viagensCadastradas;
+            let headerText = "Todas as Viagens Cadastradas";
+
+            if (mesAnoInput) {
+                const [ano, mes] = mesAnoInput.split('-');
+                viagensFiltradas = viagensCadastradas.filter(v => {
+                    return v.data.startsWith(`${ano}-${mes}`);
+                });
+                headerText = `Viagens Registradas em ${formatMonthYear(mesAnoInput)}`;
+            }
+
+            if (viagensFiltradas.length === 0) {
+                 relatoriosDiv.innerHTML = `<p style="text-align: center; color: #6c757d;">${headerText}. Nenhuma viagem encontrada.</p>`;
+                 return;
+            }
+
+            // Ordena as viagens por data, da mais recente para a mais antiga
+            viagensFiltradas.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            let cardsHTML = `<h3 class="mes-header">${headerText} (${viagensFiltradas.length} Viagens)</h3>`;
+
+            // Gera os cards
+            viagensFiltradas.forEach(viagem => {
+                const totalTrechos = viagem.trechos.length;
+                let trechosHTML = '';
+                let totalHorasViagem = 0;
+                
+                viagem.trechos.forEach((trecho, index) => {
+                    totalHorasViagem += parseFloat(trecho.totalHours || 0);
+                    
+                    trechosHTML += `
+                        <div class="trecho-item">
+                            <p><strong>Trecho ${index + 1} (${trecho.label}):</strong></p>
+                            <p>Motorista: ${trecho.motorista}</p>
+                            <p>Início: ${trecho.inicio} - Fim: ${trecho.fim} (Total: ${trecho.totalHours}h)</p>
+                        </div>
+                    `;
+                });
+                
+                const totalMinutes = Math.round(totalHorasViagem * 60);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                const totalHorasFormatado = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                
+                // Determinando se a viagem está atrasada (placeholder, mas mantendo a classe)
+                const isAtrasada = false; 
+                const atrasoClass = isAtrasada ? 'atrasada' : '';
+
+                cardsHTML += `
+                    <div class="viagem-card-report ${atrasoClass}">
+                        <h4>Viagem: ${viagem.data} | Rota: ${viagem.rota.split('_')[0].toUpperCase()}</h4>
+                        <p><strong>Total de Trechos:</strong> ${totalTrechos}</p>
+                        <p><strong>Duração Total (Estimada/Calculada):</strong> ${totalHorasFormatado}</p>
+                        ${trechosHTML}
+                        <div class="action-bar" style="margin-top: 15px;">
+                            <button class="btn-warning" onclick="editarViagem('${viagem.id}')">Editar</button>
+                            <button class="btn-danger" onclick="excluirViagem('${viagem.id}')">Excluir</button>
+                            </div>
+                    </div>
+                `;
+            });
+
+            relatoriosDiv.innerHTML = cardsHTML;
+        }
+
+        // Funções Placeholder (mantidas para o event listener não quebrar)
         async function gerarRelatorioAtrasosViaForm() { alert("Função Viagens Atrasadas será implementada em breve."); }
         async function gerarMediaPorTrecho() { alert("Função Calcular Média por Trecho será implementada em breve."); }
         async function exportData() { alert("Função Exportar Dados será implementada em breve."); }
@@ -874,7 +1060,7 @@
             document.getElementById('btnLimparViagem').addEventListener('click', limparFormularioViagem);
             
             // Relatórios
-            document.getElementById('btnGerarRelatorioHoras').addEventListener('click', gerarRelatorio);
+            document.getElementById('btnGerarRelatorioHoras').addEventListener('click', gerarRelatorioHoras);
             document.getElementById('btnGerarRelatorioGeral').addEventListener('click', gerarRelatorioGeralViaForm);
             document.getElementById('btnGerarRelatorioAtrasos').addEventListener('click', gerarRelatorioAtrasosViaForm);
             document.getElementById('btnMediaPorTrecho').addEventListener('click', gerarMediaPorTrecho);
@@ -904,6 +1090,13 @@
         } 
 
         
+        // ----------------------------------------------------------------------
+        // 7. EXPOR FUNÇÕES PARA CHAMADAS ONCLICK DO HTML GERADO
+        // ----------------------------------------------------------------------
+        window.editarViagem = editarViagem;
+        window.excluirViagem = excluirViagem;
+
+
         // --- FUNÇÕES DE AUTO-PREENCHIMENTO ---
         setupAutoFill('fim1', 'inicio2');
         setupAutoFill('fim2', 'inicio3');
