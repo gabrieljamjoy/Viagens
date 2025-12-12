@@ -707,17 +707,12 @@
         // 4. FUNÇÕES DE PERSISTÊNCIA (FIREBASE)
         // ----------------------------------------------------------------------
         
-      async function loadData() {
+     async function loadData() {
             try {
-                const docRef = doc(db, COLLECTION_NAME, DOC_PATH);
-                const docSnap = await getDoc(docRef);
-
-                // ... (seu código de sucesso aqui) ...
-
+                // ... (seu código de getDoc aqui) ...
             } catch (e) {
-                console.error("Erro ao carregar dados:", e);
-                // COMENTAR/REMOVER ESTA LINHA:
-                // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); 
+                console.error("Erro ao carregar dados:", e); // O erro real será exibido aqui!
+                // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); // Remova ou comente!
             }
         }
         
@@ -960,4 +955,5 @@
     </script>
 </body>
 </html>
+
 
