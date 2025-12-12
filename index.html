@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ViagensPro DEV - Gerenciador de Rotas Múltiplas (Online)</title>
     <style>
+        /* ... (Seu bloco de CSS permanece inalterado) ... */
         /* BASE & TYPOGRAPHY */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -346,7 +347,7 @@
                     <input id="nomeMotorista" type="text" placeholder="Ex: João da Silva" required>
                 </div>
                 <div style="flex-grow: 0; align-self: flex-end;">
-                    <button onclick="addMotorista()" class="btn-success" style="width: auto; padding: 10px 20px;">Adicionar</button>
+                    <button id="btnAddMotorista" class="btn-success" style="width: auto; padding: 10px 20px;">Adicionar</button>
                 </div>
             </div>
             <h3>Motoristas Cadastrados:</h3>
@@ -431,8 +432,8 @@
             </fieldset>
 
             <div class="action-bar">
-                <button onclick="addViagem()" class="btn-success">Salvar Viagem</button>
-                <button onclick="limparFormularioViagem()" class="btn-secondary">Cancelar Edição / Limpar</button>
+                <button id="btnSalvarViagem" class="btn-success">Salvar Viagem</button>
+                <button id="btnLimparViagem" class="btn-secondary">Cancelar Edição / Limpar</button>
             </div>
         </div>
         
@@ -449,15 +450,15 @@
                     </div>
                     
                     <div class="filter-buttons-container" style="align-self: flex-end; flex-grow: 1;">
-                        <button onclick="gerarRelatorio()" class="btn-secondary filter-buttons-stack">Relatório de Horas de Motoristas</button>
-                        <button onclick="gerarRelatorioGeralViaForm()" class="btn-primary filter-buttons-stack">Visualizar Viagens (Cards)</button>
-                        <button onclick="gerarRelatorioAtrasosViaForm()" class="btn-info filter-buttons-stack">Viagens Atrasadas</button>
+                        <button id="btnGerarRelatorioHoras" class="btn-secondary filter-buttons-stack">Relatório de Horas de Motoristas</button>
+                        <button id="btnGerarRelatorioGeral" class="btn-primary filter-buttons-stack">Visualizar Viagens (Cards)</button>
+                        <button id="btnGerarRelatorioAtrasos" class="btn-info filter-buttons-stack">Viagens Atrasadas</button>
                     </div>
                 </div>
             </div>
 
             <div class="action-bar" style="margin-top: 0;">
-                <button onclick="gerarMediaPorTrecho()" class="btn-secondary">Calcular Média por Trecho</button>
+                <button id="btnMediaPorTrecho" class="btn-secondary">Calcular Média por Trecho</button>
             </div>
 
             <hr style="margin: 30px 0;">
@@ -475,7 +476,7 @@
                     Cria um arquivo JSON local dos dados atualmente carregados do Firebase.
                 </p>
                 <div class="action-bar" style="margin-top: 0;">
-                    <button onclick="exportData()" class="btn-secondary" style="width: auto;">Exportar Dados DEV (JSON)</button>
+                    <button id="btnExportData" class="btn-secondary" style="width: auto;">Exportar Dados DEV (JSON)</button>
                 </div>
             </div>
 
@@ -493,7 +494,7 @@
                         <input type="file" id="importFile" accept=".json" onchange="updateFileName()">
                     </div>
                     <div style="align-self: flex-end; display: flex;">
-                        <button onclick="importData()" class="btn-success" style="width: auto;">Importar</button>
+                        <button id="btnImportData" class="btn-success" style="width: auto;">Importar</button>
                     </div>
                 </div>
             </div>
@@ -505,7 +506,7 @@
                 Exclui permanentemente todos os dados DEV salvos no **Firebase Firestore**.
             </p>
             <div class="action-bar">
-                <button onclick="clearData()" class="btn-danger">Limpar TODOS os Dados DEV (Online)</button>
+                <button id="btnClearData" class="btn-danger">Limpar TODOS os Dados DEV (Online)</button>
             </div>
         </div>
         </div> <div id="detalhesModal">
@@ -514,7 +515,7 @@
             <p id="detalhesCorpo"></p>
             <div class="action-bar" style="justify-content: flex-end;">
                 <button id="btnEditarModal" class="btn-warning">Editar Viagem</button>
-                <button onclick="document.getElementById('detalhesModal').style.display = 'none'" class="btn-secondary">Fechar</button>
+                <button id="btnFecharDetalhesModal" class="btn-secondary">Fechar</button> 
             </div>
         </div>
     </div>
@@ -536,1033 +537,66 @@
             </select>
 
             <div class="action-bar" style="justify-content: flex-end;">
-                <button onclick="salvarJustificativa()" class="btn-danger">Salvar Justificativa</button>
-                <button onclick="document.getElementById('justificativaModal').style.display = 'none'" class="btn-secondary">Cancelar</button>
+                <button id="btnSalvarJustificativa" class="btn-danger">Salvar Justificativa</button>
+                <button id="btnCancelarJustificativa" class="btn-secondary">Cancelar</button>
             </div>
         </div>
     </div>
     
-    <script type="module">
-        // --- CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE (SUAS CHAVES) ---
+    ```
+
+### 2. Correções no JavaScript (Adicionando `setupEventListeners`)
+
+No final do seu arquivo, dentro da tag `<script type="module">`, localize e insira a nova função `setupEventListeners()` e chame-a no final.
+
+**Substitua o trecho final do seu código JavaScript pelo seguinte:**
+
+```javascript
+        // ... (Todas as suas funções: calculateHours, addMotorista, addViagem, etc., permanecem aqui) ...
+
+        // --- LIGAÇÃO DE EVENTOS DO HTML AO ESCOPO DO MÓDULO (CORREÇÃO FINAL) ---
         
-        import { initializeApp } from "https://www.gstatic.com/firebase/9/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebase/9/firebase-firestore.js";
+        function setupEventListeners() {
+            // Cadastro de Motoristas
+            document.getElementById('btnAddMotorista').addEventListener('click', addMotorista);
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCKKVtLUKRWhMvdsQInr4saBMO8PO1PZ2k",
-            authDomain: "cadastro-de-viagens.firebaseapp.com",
-            projectId: "cadastro-de-viagens",
-            storageBucket: "cadastro-de-viagens.firebasestorage.app",
-            messagingSenderId: "366307042816",
-            appId: "1:366307042816:web:93bb38413a0e5e26689ae5"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // DOCUMENTO ÚNICO PARA SALVAR TODOS OS DADOS DO PROJETO DEV
-        const DOC_PATH = "dev_data";
-        const COLLECTION_NAME = "viagens_pro_db"; 
-        
-        // --- CONFIGURAÇÃO DE ROTAS E METAS (INALTERADO) ---
-        const ROTAS_CONFIG = {
-            'osasco-teofilo_ida': [
-                { chegadaMeta: '01:30', toleranciaMin: 30 }, 
-                { chegadaMeta: '10:30', toleranciaMin: 30 }
-            ],
-            'osasco-teofilo_volta': [
-                { chegadaMeta: '22:30', toleranciaMin: 30 },
-                { chegadaMeta: '11:00', toleranciaMin: 30 }
-            ],
-            'osasco-porto_ida': [
-                { chegadaMeta: '20:30', toleranciaMin: 30 },
-                { chegadaMeta: '04:00', toleranciaMin: 30 },
-                { chegadaMeta: '14:00', toleranciaMin: 30 }
-            ],
-            'osasco-porto_volta': [
-                { chegadaMeta: '21:30', toleranciaMin: 30 },
-                { chegadaMeta: '06:30', toleranciaMin: 30 },
-                { chegadaMeta: '17:00', toleranciaMin: 60 }
-            ]
-        };
-
-        // Variáveis globais (carregadas do Firebase)
-        let motoristas = [];
-        let viagens = [];
-        
-        // --- NOVAS FUNÇÕES DE PERSISTÊNCIA (FIREBASE) ---
-        
-        async function loadData() {
-            try {
-                const docRef = doc(db, COLLECTION_NAME, DOC_PATH);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    motoristas = data.motoristas || [];
-                    viagens = data.viagens || [];
-                    console.log("Dados carregados do Firestore com sucesso.");
-                } else {
-                    console.log("Nenhum dado encontrado no Firestore. Iniciando com dados vazios.");
-                }
-            } catch (e) {
-                console.error("Erro ao carregar dados do Firestore:", e);
-                alert("Erro ao carregar dados online. Verifique sua conexão e se as regras do Firebase estão corretas.");
-            } finally {
-                updateMotoristasList();
-            }
-        }
-
-        async function saveData() {
-            try {
-                await setDoc(doc(db, COLLECTION_NAME, DOC_PATH), {
-                    motoristas: motoristas,
-                    viagens: viagens,
-                    timestamp: new Date().toISOString()
-                });
-                console.log("Dados salvos no Firestore com sucesso.");
-            } catch (e) {
-                console.error("Erro ao salvar dados no Firestore:", e);
-                alert("Erro ao salvar dados online. A alteração pode não ter sido persistida.");
-            }
-        }
-
-        async function clearData() {
-            if (confirm('Tem certeza que deseja APAGAR TODOS OS DADOS DEV do Firebase? Esta ação é IRREVERSÍVEL!')) {
-                try {
-                    await setDoc(doc(db, COLLECTION_NAME, DOC_PATH), {
-                        motoristas: [],
-                        viagens: [],
-                        timestamp: new Date().toISOString()
-                    });
-                    motoristas = [];
-                    viagens = [];
-                    updateMotoristasList();
-                    document.getElementById('relatorios').innerHTML = '<p style="text-align: center; color: #6c757d;">Todos os dados DEV do Firebase foram apagados com sucesso.</p>';
-                    alert('Todos os dados DEV do Firebase foram apagados com sucesso.');
-                } catch (e) {
-                    console.error("Erro ao limpar dados do Firestore:", e);
-                    alert("Erro ao tentar apagar dados no Firebase.");
-                }
-            }
-        }
-        
-        // --- FUNÇÕES DE HORA ---
-
-        function timeToMinutes(time) {
-            if (!time) return 0;
-            const [h, m] = time.split(':').map(Number);
-            return h * 60 + m;
-        }
-
-        function formatHours(decimalHours) {
-            const h = Math.floor(decimalHours);
-            const m = Math.round((decimalHours - h) * 60);
-            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-        }
-        
-        function totalHoursToDecimal(hours) {
-            return hours.toFixed(2);
-        }
-
-        function calculateHours(start, end) {
-            const [sh, sm] = start.split(':').map(Number);
-            const [eh, em] = end.split(':').map(Number);
-            let hours = (eh - sh) + (em - sm) / 60;
-            if (hours < 0) hours += 24;
-            return hours;
-        }
-
-        function calculateNightHours(start, end) {
-            const NIGHT_START_TIME = 22 * 60; 
-            const NIGHT_END_TIME = 5 * 60;   
-            const DAY_MINUTES = 24 * 60;     
-
-            const timeToMinutes = (time) => {
-                const [h, m] = time.split(':').map(Number);
-                return h * 60 + m;
-            };
-
-            let startMinutes = timeToMinutes(start);
-            let endMinutes = timeToMinutes(end);
-            let totalNightMinutes = 0;
-
-            if (endMinutes < startMinutes) {
-                endMinutes += DAY_MINUTES; 
-            }
-
-            const nightPart1Start = NIGHT_START_TIME; 
-            const nightPart1End = DAY_MINUTES;        
-
-            const overlap1Start = Math.max(startMinutes, nightPart1Start);
-            const overlap1End = Math.min(endMinutes, nightPart1End);
-
-            if (overlap1End > overlap1Start) {
-                totalNightMinutes += (overlap1End - overlap1Start);
-            }
-
-            const nightPart2Start = DAY_MINUTES;             
-            const nightPart2End = DAY_MINUTES + NIGHT_END_TIME; 
-
-            const overlap2Start = Math.max(startMinutes, nightPart2Start);
-            const overlap2End = Math.min(endMinutes, nightPart2End);
-
-            if (overlap2End > overlap2Start) {
-                totalNightMinutes += (overlap2End - overlap2Start);
-            }
-
-            return totalNightMinutes / 60; 
-        }
-
-        // --- FUNÇÕES DE VIAGEM E MOTORISTAS ---
-        
-        function createViagemId(data, inicio1) {
-            return `${data}T${inicio1}`;
-        }
-        
-        async function addMotorista() {
-            const nome = document.getElementById('nomeMotorista').value.trim();
-            if (nome && !motoristas.includes(nome)) {
-                motoristas.push(nome);
-                await saveData();
-                updateMotoristasList();
-                document.getElementById('nomeMotorista').value = '';
-            } else if (nome) {
-                alert('Motorista já cadastrado.');
-            } else {
-                alert('Por favor, digite o nome do motorista.');
-            }
-        }
-        
-        async function addViagem() {
-            const rota = document.getElementById('rota').value;
-            const data = document.getElementById('dataViagem').value;
-            const isThreeTrecho = rota.includes('porto');
+            // Cadastro de Viagens
+            document.getElementById('btnSalvarViagem').addEventListener('click', addViagem);
+            document.getElementById('btnLimparViagem').addEventListener('click', limparFormularioViagem);
             
-            const m1 = document.getElementById('motorista1').value;
-            const inicio1 = document.getElementById('inicio1').value;
-            const fim1 = document.getElementById('fim1').value;
-            const m2 = document.getElementById('motorista2').value;
-            const inicio2 = document.getElementById('inicio2').value;
-            const fim2 = document.getElementById('fim2').value;
+            // Relatórios
+            document.getElementById('btnGerarRelatorioHoras').addEventListener('click', gerarRelatorio);
+            document.getElementById('btnGerarRelatorioGeral').addEventListener('click', gerarRelatorioGeralViaForm);
+            document.getElementById('btnGerarRelatorioAtrasos').addEventListener('click', gerarRelatorioAtrasosViaForm);
+            document.getElementById('btnMediaPorTrecho').addEventListener('click', gerarMediaPorTrecho);
+
+            // Gerenciamento de Dados
+            document.getElementById('btnExportData').addEventListener('click', exportData);
+            document.getElementById('btnImportData').addEventListener('click', importData);
+            document.getElementById('btnClearData').addEventListener('click', clearData);
             
-            const viagemEmEdicaoId = document.getElementById('viagemEmEdicaoId').value; 
+            // Modais
+            document.getElementById('btnSalvarJustificativa').addEventListener('click', salvarJustificativa);
             
-            if (!rota || !data || !m1 || !inicio1 || !fim1 || !m2 || !inicio2 || !fim2) {
-                alert('Preencha todos os campos obrigatórios.');
-                return;
-            }
-
-            const novoViagemId = createViagemId(data, inicio1); 
-
-            let m3, inicio3, fim3, hours3 = 0, nightHours3 = 0, trecho3Nome = null;
-            
-            const hours1 = calculateHours(inicio1, fim1);
-            const nightHours1 = calculateNightHours(inicio1, fim1);
-            const hours2 = calculateHours(inicio2, fim2);
-            const nightHours2 = calculateNightHours(inicio2, fim2);
-
-            if (isThreeTrecho) {
-                m3 = document.getElementById('motorista3').value;
-                inicio3 = document.getElementById('inicio3').value;
-                fim3 = document.getElementById('fim3').value;
-                if (!m3 || !inicio3 || !fim3) {
-                    alert('Preencha os campos do Terceiro Trecho.');
-                    return;
-                }
-                hours3 = calculateHours(inicio3, fim3);
-                nightHours3 = calculateNightHours(inicio3, fim3);
-            }
-
-            let trecho1Nome, trecho2Nome;
-            switch (rota) {
-                case 'osasco-teofilo_ida':
-                    trecho1Nome = 'Osasco-SP → Belo Horizonte-MG';
-                    trecho2Nome = 'Belo Horizonte-MG → Teófilo Otoni-MG';
-                    break;
-                case 'osasco-teofilo_volta':
-                    trecho1Nome = 'Teófilo Otoni-MG → Belo Horizonte-MG';
-                    trecho2Nome = 'Belo Horizonte-MG → Osasco-SP';
-                    break;
-                case 'osasco-porto_ida':
-                    trecho1Nome = 'Osasco-SP → Belo Horizonte-MG';
-                    trecho2Nome = 'Belo Horizonte-MG → Teófilo Otoni-MG';
-                    trecho3Nome = 'Teófilo Otoni-MG → Porto Seguro-BA';
-                    break;
-                case 'osasco-porto_volta':
-                    trecho1Nome = 'Porto Seguro-BA → Teófilo Otoni-MG';
-                    trecho2Nome = 'Teófilo Otoni-MG → Belo Horizonte-MG';
-                    trecho3Nome = 'Belo Horizonte-MG → Osasco-SP';
-                    break;
-            }
-
-            const trechos = [
-                { nome: trecho1Nome, motorista: m1, inicio: inicio1, fim: fim1, horas: hours1, horasNoturnas: nightHours1 },
-                { nome: trecho2Nome, motorista: m2, inicio: inicio2, fim: fim2, horas: hours2, horasNoturnas: nightHours2 }
-            ];
-            if (isThreeTrecho) {
-                trechos.push({ nome: trecho3Nome, motorista: m3, inicio: inicio3, fim: fim3, horas: hours3, horasNoturnas: nightHours3 });
-            }
-            
-            const dateObj = new Date(data + 'T00:00:00');
-            const day = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
-            
-            
-            // --- LÓGICA DE ATRASO AO SALVAR (Verifica o ÚLTIMO Trecho) ---
-            let isAtrasada = false;
-            let atrasoJustificativa = '';
-            
-            const ultimoTrecho = trechos[trechos.length - 1];
-            const ultimoTrechoIndex = trechos.length - 1;
-            const configUltimoTrecho = ROTAS_CONFIG[rota][ultimoTrechoIndex];
-
-            if (configUltimoTrecho) {
-                const [metaH, metaM] = configUltimoTrecho.chegadaMeta.split(':').map(Number);
-                const toleranciaMin = configUltimoTrecho.toleranciaMin;
-                let metaTotalMin = metaH * 60 + metaM + toleranciaMin;
-                
-                const [chegadaH, chegadaM] = ultimoTrecho.fim.split(':').map(Number);
-                let chegadaTotalMin = chegadaH * 60 + chegadaM;
-                
-                const inicioUltimoTrechoMin = timeToMinutes(ultimoTrecho.inicio);
-
-                if (chegadaTotalMin < inicioUltimoTrechoMin) {
-                    chegadaTotalMin += (24 * 60);
-                }
-                
-                if (metaTotalMin < inicioUltimoTrechoMin) {
-                    metaTotalMin += (24 * 60); 
-                }
-                
-                if (chegadaTotalMin > metaTotalMin) {
-                    isAtrasada = true;
-                    atrasoJustificativa = 'Aguardando justificativa';
-                    alert('AVISO: Esta viagem está registrada como ATRASADA no destino final. Por favor, utilize o novo relatório para justificar.');
-                }
-            }
-
-            const viagemAtualizada = {
-                id: novoViagemId, 
-                data,
-                day, 
-                rota,
-                trechos: trechos,
-                atraso: {
-                    isAtrasada: isAtrasada,
-                    justificativa: atrasoJustificativa 
-                }
-            };
-            
-            if (viagemEmEdicaoId) {
-                const index = viagens.findIndex(v => v.id === viagemEmEdicaoId);
-
-                if (viagemEmEdicaoId !== novoViagemId && viagens.some(v => v.id === novoViagemId)) {
-                     alert(`Erro: Já existe uma viagem cadastrada nesta data/horário de início (${data} às ${inicio1}).`);
-                     return;
-                }
-
-                if (index !== -1) {
-                    // Mantém a justificativa anterior se a viagem ainda estiver atrasada
-                    if (viagens[index].atraso && viagens[index].atraso.justificativa !== 'Aguardando justificativa' && isAtrasada) {
-                        viagemAtualizada.atraso.justificativa = viagens[index].atraso.justificativa;
-                    }
-                    viagens[index] = viagemAtualizada;
-                    alert(`Viagem de ${data} (Início: ${inicio1}) editada com sucesso.`);
-                } else {
-                    alert('Erro: Viagem original não encontrada para edição.');
-                }
-            } else {
-                if (viagens.some(v => v.id === novoViagemId)) {
-                     alert(`Erro: Já existe uma viagem cadastrada nesta data/horário de início (${data} às ${inicio1}).`);
-                     return;
-                }
-                viagens.push(viagemAtualizada);
-                alert(`Viagem da rota ${rota} cadastrada com sucesso.`);
-            }
-            
-            await saveData();
-            limparFormularioViagem();
-        }
-
-        async function salvarJustificativa() {
-            const viagemId = document.getElementById('atrasoViagemId').value;
-            const motivo = document.getElementById('motivoAtraso').value;
-
-            if (!motivo) {
-                alert('Por favor, selecione uma justificativa.');
-                return;
-            }
-
-            const viagemIndex = viagens.findIndex(v => v.id === viagemId);
-            if (viagemIndex !== -1) {
-                viagens[viagemIndex].atraso.justificativa = motivo;
-                await saveData(); 
+            // Modal Detalhes (Fechar)
+            document.getElementById('btnFecharDetalhesModal').addEventListener('click', () => {
+                document.getElementById('detalhesModal').style.display = 'none';
+            });
+            // Modal Justificativa (Cancelar)
+            document.getElementById('btnCancelarJustificativa').addEventListener('click', () => {
                 document.getElementById('justificativaModal').style.display = 'none';
-                
-                const mesAno = document.getElementById('mesAno').value;
-                if (mesAno) {
-                    gerarRelatorioAtrasos(mesAno);
-                }
-            } else {
-                alert('Erro: Viagem não encontrada.');
-            }
-        }
-        
-        function updateMotoristasList() {
-            const lista = document.getElementById('listaMotoristas');
-            lista.innerHTML = '';
-            motoristas.forEach(m => {
-                const li = document.createElement('li');
-                li.textContent = m;
-                lista.appendChild(li);
             });
             
-            const selects = [document.getElementById('motorista1'), document.getElementById('motorista2'), document.getElementById('motorista3')];
-            selects.forEach(select => {
-                const currentValue = select.value; 
-                select.innerHTML = '<option value="">Selecione</option>';
-                motoristas.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m;
-                    opt.textContent = m;
-                    select.appendChild(opt.cloneNode(true));
-                });
-                if (motoristas.includes(currentValue)) {
-                    select.value = currentValue;
-                }
-            });
-        }
-        
-        function limparFormularioViagem() {
-            document.getElementById('viagemEmEdicaoId').value = ''; 
-            document.getElementById('mensagemEdicao').textContent = '';
-            document.getElementById('rota').value = '';
-            updateFormLabels(); 
-            document.getElementById('dataViagem').value = '';
-            document.getElementById('diaSemana').textContent = '';
-            document.getElementById('motorista1').value = '';
-            document.getElementById('inicio1').value = '';
-            document.getElementById('fim1').value = '';
-            document.getElementById('motorista2').value = '';
-            document.getElementById('inicio2').value = '';
-            document.getElementById('fim2').value = '';
-            document.getElementById('motorista3').value = '';
-            document.getElementById('inicio3').value = '';
-            document.getElementById('fim3').value = '';
+            // O botão "Editar Viagem" dentro do modal (btnEditarModal) tem a função 
+            // setada dinamicamente via JS na função 'mostrarDetalhesViagem'.
 
-            document.querySelector('.card#cadastro-viagens').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function updateFormLabels() {
-            const rota = document.getElementById('rota').value;
-            const legend1 = document.getElementById('legend1');
-            const legend2 = document.getElementById('legend2');
-            const legend3 = document.getElementById('legend3');
-            const fieldset3 = document.getElementById('fieldset3');
-
-            legend1.textContent = 'Trecho 1:';
-            legend2.textContent = 'Trecho 2:';
-            legend3.textContent = 'Trecho 3:';
-            fieldset3.style.display = 'none';
-
-            if (rota === 'osasco-teofilo_ida') {
-                legend1.textContent = 'Trecho 1: Osasco-SP → Belo Horizonte-MG';
-                legend2.textContent = 'Trecho 2: Belo Horizonte-MG → Teófilo Otoni-MG';
-            } else if (rota === 'osasco-teofilo_volta') {
-                legend1.textContent = 'Trecho 1: Teófilo Otoni-MG → Belo Horizonte-MG';
-                legend2.textContent = 'Trecho 2: Belo Horizonte-MG → Osasco-SP';
-            } else if (rota === 'osasco-porto_ida') {
-                legend1.textContent = 'Trecho 1: Osasco-SP → Belo Horizonte-MG';
-                legend2.textContent = 'Trecho 2: Belo Horizonte-MG → Teófilo Otoni-MG';
-                legend3.textContent = 'Trecho 3: Teófilo Otoni-MG → Porto Seguro-BA';
-                fieldset3.style.display = 'block';
-            } else if (rota === 'osasco-porto_volta') {
-                legend1.textContent = 'Trecho 1: Porto Seguro-BA → Teófilo Otoni-MG';
-                legend2.textContent = 'Trecho 2: Teófilo Otoni-MG → Belo Horizonte-MG';
-                legend3.textContent = 'Trecho 3: Belo Horizonte-MG → Osasco-SP';
-                fieldset3.style.display = 'block';
-            }
-            const isThreeTrecho = rota.includes('porto');
-            document.getElementById('motorista3').required = isThreeTrecho;
-            document.getElementById('inicio3').required = isThreeTrecho;
-            document.getElementById('fim3').required = isThreeTrecho;
-        }
-
-        document.getElementById('dataViagem').addEventListener('change', function() {
-            const data = this.value;
-            if (data) {
-                const dateObj = new Date(data + 'T00:00:00'); 
-                const day = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' });
-                document.getElementById('diaSemana').textContent = ` (${day[0].toUpperCase()}${day.slice(1)})`;
-            } else {
-                document.getElementById('diaSemana').textContent = '';
-            }
-        });
-        
-        function editarViagem(viagemId) { 
-            const viagem = viagens.find(v => v.id === viagemId); 
-            
-            if (!viagem) {
-                alert('Viagem não encontrada para edição.');
-                return;
-            }
-            
-            document.getElementById('detalhesModal').style.display = 'none';
-
-            document.getElementById('viagemEmEdicaoId').value = viagemId; 
-            document.getElementById('mensagemEdicao').textContent = `EDITANDO VIAGEM de ${viagem.data.split('-').reverse().join('/')} (Início Trecho 1: ${viagem.trechos[0].inicio}).`;
-            
-            document.querySelector('.card#cadastro-viagens').scrollIntoView({ behavior: 'smooth' });
-
-            document.getElementById('rota').value = viagem.rota;
-            updateFormLabels(); 
-            
-            document.getElementById('dataViagem').value = viagem.data;
-            document.getElementById('dataViagem').dispatchEvent(new Event('change')); 
-
-            document.getElementById('motorista1').value = viagem.trechos[0].motorista;
-            document.getElementById('inicio1').value = viagem.trechos[0].inicio;
-            document.getElementById('fim1').value = viagem.trechos[0].fim;
-
-            document.getElementById('motorista2').value = viagem.trechos[1].motorista;
-            document.getElementById('inicio2').value = viagem.trechos[1].inicio;
-            document.getElementById('fim2').value = viagem.trechos[1].fim;
-
-            if (viagem.trechos.length > 2) {
-                document.getElementById('motorista3').value = viagem.trechos[2].motorista;
-                document.getElementById('inicio3').value = viagem.trechos[2].inicio;
-                document.getElementById('fim3').value = viagem.trechos[2].fim;
-                document.getElementById('fieldset3').style.display = 'block';
-            } else {
-                 document.getElementById('motorista3').value = '';
-                document.getElementById('inicio3').value = '';
-                document.getElementById('fim3').value = '';
-                document.getElementById('fieldset3').style.display = 'none';
-            }
-        }
-        
-        function mostrarDetalhesViagem(viagemId, motorista) { 
-            const viagem = viagens.find(v => v.id === viagemId); 
-
-            if (!viagem) {
-                alert('Detalhes da viagem não encontrados.');
-                return;
-            }
-
-            let detalhesHTML = `<p><strong>Rota:</strong> ${viagem.rota.toUpperCase()}</p>`;
-            
-            if (viagem.atraso && viagem.atraso.isAtrasada) {
-                detalhesHTML += `<p style="color: #dc3545; font-weight: bold; border: 1px dashed #dc3545; padding: 5px; border-radius: 4px;">🚨 ATRASADA: ${viagem.atraso.justificativa || 'Aguardando justificativa'}</p>`;
-            }
-            detalhesHTML += `<hr>`;
-            
-            viagem.trechos.forEach((trecho, index) => {
-                const isMotoristaNaViagem = motorista && trecho.motorista === motorista;
-                const highlightStyle = isMotoristaNaViagem ? 'style="background-color: #fbe9e7; border: 1px solid #ff5722; padding: 10px; border-radius: 6px; margin-top: 10px;"' : 'style="border: 1px solid #f0f0f0; padding: 10px; border-radius: 6px; margin-top: 10px;"';
-
-                const nightHours = trecho.horasNoturnas !== undefined ? totalHoursToDecimal(trecho.horasNoturnas) : '0.00';
-                
-                detalhesHTML += `<div ${highlightStyle}>`;
-                detalhesHTML += `<h4 style="margin: 0; color: #495057;">Trecho ${index + 1} (${trecho.nome}):</h4>`;
-                detalhesHTML += `<p style="margin: 5px 0;"><strong>Motorista:</strong> ${trecho.motorista}</p>`;
-                detalhesHTML += `<p style="margin: 5px 0;"><strong>Horário:</strong> ${trecho.inicio} → ${trecho.fim}</p>`;
-                detalhesHTML += `<p style="margin: 5px 0;"><strong>Horas Totais:</strong> ${totalHoursToDecimal(trecho.horas)} h | <span class="night-hours" style="background-color: transparent;">Noturnas: ${nightHours} h</span></p>`;
-                
-                const config = ROTAS_CONFIG[viagem.rota];
-                if (config && config[index]) {
-                     const isLastTrecho = index === viagem.trechos.length - 1;
-                     const targetInfo = isLastTrecho ? `<br>Meta Chegada Destino: ${config[index].chegadaMeta} (Tolerância: ${config[index].toleranciaMin} min)` : '';
-                     detalhesHTML += `<p style="margin: 5px 0; font-size: 0.9em; color: #6c757d;">${targetInfo}</p>`;
-                }
-
-                detalhesHTML += `</div>`;
-            });
-
-            document.getElementById('detalhesTitulo').textContent = `Detalhes da Viagem de ${viagem.data.split('-').reverse().join('/')} (Início: ${viagem.trechos[0].inicio})`;
-            document.getElementById('detalhesCorpo').innerHTML = detalhesHTML;
-            
-            document.getElementById('btnEditarModal').setAttribute('onclick', `editarViagem('${viagemId}')`);
-            
-            document.getElementById('detalhesModal').style.display = 'flex';
-        }
-
-        function gerarMediaPorTrecho() {
-            const rel = document.getElementById('relatorios');
-            rel.innerHTML = '';
-
-            if (viagens.length === 0) {
-                rel.innerHTML = '<h3>Média por Trecho</h3><p>Nenhuma viagem cadastrada para calcular a média.</p>';
-                return;
-            }
-
-            const trechosData = {}; 
-
-            viagens.forEach(v => {
-                v.trechos.forEach(trecho => {
-                    const trechoNome = trecho.nome;
-                    const horas = trecho.horas;
-
-                    if (!trechosData[trechoNome]) {
-                        trechosData[trechoNome] = { totalHours: 0, count: 0 };
-                    }
-
-                    trechosData[trechoNome].totalHours += horas;
-                    trechosData[trechoNome].count += 1;
-                });
-            });
-
-            const table = document.createElement('table');
-            const caption = document.createElement('caption');
-            caption.textContent = `Tempo Médio de Viagem por Trecho (Baseado em ${viagens.length} Viagens DEV)`;
-            table.appendChild(caption);
-
-            const thead = document.createElement('thead');
-            const trh = document.createElement('tr');
-            ['Trecho', 'Média de Horas (h)', 'Viagens Contabilizadas'].forEach(headerText => {
-                const th = document.createElement('th'); th.textContent = headerText; trh.appendChild(th);
-            });
-            thead.appendChild(trh);
-            table.appendChild(thead);
-
-            const tbody = document.createElement('tbody');
-            
-            const trechosOrdenados = Object.keys(trechosData).sort();
-
-            trechosOrdenados.forEach(trechoNome => {
-                const data = trechosData[trechoNome];
-                const mediaHours = data.totalHours / data.count;
-                
-                const tr = document.createElement('tr');
-                
-                const td1 = document.createElement('td'); td1.textContent = trechoNome; 
-                const td2 = document.createElement('td'); td2.textContent = totalHoursToDecimal(mediaHours);
-                const td3 = document.createElement('td'); td3.textContent = data.count;
-                
-                tr.appendChild(td1);
-                tr.appendChild(td2);
-                tr.appendChild(td3);
-                tbody.appendChild(tr);
-            });
-
-            table.appendChild(tbody);
-            rel.innerHTML = '';
-            rel.appendChild(table);
-        }
-        
-        function gerarRelatorioGeralViaForm() {
-            const mesAno = document.getElementById('mesAno').value;
-            if (!mesAno) {
-                alert('Por favor, selecione o Mês/Ano no campo de filtro.');
-                return;
-            }
-            gerarRelatorioGeral(mesAno);
-        }
-
-        function gerarRelatorioGeral(filterMonthYear) {
-            const rel = document.getElementById('relatorios');
-            rel.innerHTML = '';
-            
-            if (viagens.length === 0) {
-                rel.innerHTML = '<h3>Relatório Geral de Viagens</h3><p style="text-align: center;">Nenhuma viagem cadastrada.</p>';
-                return;
-            }
-            
-            if (!filterMonthYear) {
-                rel.innerHTML = '<h3>Relatório Geral de Viagens</h3><p style="text-align: center;">Por favor, selecione o Mês/Ano no campo de filtro para visualizar.</p>';
-                return;
-            }
-
-            const viagensDoMes = [...viagens]
-                .filter(v => v.data.substring(0, 7) === filterMonthYear)
-                .sort((a, b) => a.id.localeCompare(b.id)); 
-
-            const [year, month] = filterMonthYear.split('-');
-            const date = new Date(year, month - 1);
-            const mesFormatado = date.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
-
-            if (viagensDoMes.length === 0) {
-                rel.innerHTML = `<h3>Relatório de Viagens - ${mesFormatado}</h3><p style="text-align: center;">Nenhuma viagem encontrada para o mês/ano selecionado.</p>`;
-                return;
-            }
-            
-            let html = `<h3>Relatório de Viagens Filtrado (DEV) - ${mesFormatado}</h3>`;
-            
-            html += `<div class="mes-header">🗓️ ${mesFormatado.toUpperCase()}</div>`;
-
-            viagensDoMes.forEach(viagem => {
-                const formattedDate = viagem.data.split('-').reverse().join('/');
-                const totalHours = viagem.trechos.reduce((sum, trecho) => sum + trecho.horas, 0);
-                const dayDisplay = viagem.day[0].toUpperCase() + viagem.day.slice(1);
-                
-                const cardClass = viagem.atraso && viagem.atraso.isAtrasada ? 'viagem-card-report atrasada' : 'viagem-card-report';
-                const atrasoInfo = viagem.atraso && viagem.atraso.isAtrasada ? 
-                    `<p style="color: #dc3545; margin-bottom: 5px;">🚨 ATRASADA: ${viagem.atraso.justificativa || 'Aguardando justificativa'}</p>` : '';
-
-                html += `<div class="${cardClass}">`;
-                html += `<h4>${formattedDate} (${dayDisplay}) | Início: ${viagem.trechos[0].inicio}</h4>`; 
-                html += atrasoInfo;
-                html += `<p style="margin-top: -10px;">Rota: <strong>${viagem.rota.toUpperCase()}</strong> | Total na Jornada: <strong>${totalHoursToDecimal(totalHours)} h</strong></p>`;
-                
-                html += '<p style="font-weight: 600; margin-top: 15px; margin-bottom: 5px;">Detalhes dos Trechos:</p>';
-                viagem.trechos.forEach((trecho, index) => {
-                    const nightHours = trecho.horasNoturnas !== undefined ? totalHoursToDecimal(trecho.horasNoturnas) : '0.00';
-                    html += `<div class="trecho-item">`;
-                    html += `<p style="margin: 0;"><strong>Trecho ${index + 1} (${trecho.nome}):</strong></p>`;
-                    html += `<p style="margin: 3px 0 0 0; font-size: 0.9em;">Motorista: ${trecho.motorista}, Horário: ${trecho.inicio} - ${trecho.fim} (${totalHoursToDecimal(trecho.horas)} h)</p>`;
-                    html += `<span class="night-hours" style="font-size: 0.9em;">Horas Noturnas: ${nightHours} h</span>`;
-                    
-                    const config = ROTAS_CONFIG[viagem.rota];
-                    if (config && index === viagem.trechos.length - 1) {
-                         html += `<p style="margin: 0; font-size: 0.8em; color: #007bff;">Meta Chegada: ${config[index].chegadaMeta} + ${config[index].toleranciaMin} min</p>`;
-                    }
-                    html += `</div>`;
-                });
-                
-                html += `<div class="action-bar" style="margin-top: 10px;">`;
-                html += `<button class="btn-primary" style="padding: 8px 15px;" onclick="mostrarDetalhesViagem('${viagem.id}')">Ver Detalhes</button>`; 
-                html += `<button class="btn-warning" style="padding: 8px 15px;" onclick="editarViagem('${viagem.id}')">Editar</button>`;
-                html += `</div>`;
-
-                html += `</div>`;
-            });
-
-            rel.innerHTML = html;
-        }
-        
-        function gerarRelatorioAtrasosViaForm() {
-            const mesAno = document.getElementById('mesAno').value;
-            if (!mesAno) {
-                alert('Por favor, selecione o Mês/Ano no campo de filtro.');
-                return;
-            }
-            gerarRelatorioAtrasos(mesAno);
-        }
-
-        function abrirJustificativaModal(viagemId) {
-            const viagem = viagens.find(v => v.id === viagemId);
-            if (!viagem) return;
-            
-            document.getElementById('atrasoViagemId').value = viagemId;
-            document.getElementById('justificativaHeader').textContent = 
-                `Viagem de ${viagem.data.split('-').reverse().join('/')} (${viagem.rota.toUpperCase()}) está atrasada.`;
-            
-            document.getElementById('motivoAtraso').value = 
-                (viagem.atraso && viagem.atraso.justificativa && viagem.atraso.justificativa !== 'Aguardando justificativa') ? 
-                viagem.atraso.justificativa : '';
-
-            document.getElementById('justificativaModal').style.display = 'flex';
-        }
-        
-        function gerarRelatorioAtrasos(filterMonthYear) {
-            const rel = document.getElementById('relatorios');
-            rel.innerHTML = '';
-            
-            const viagensDoMes = [...viagens]
-                .filter(v => v.data.substring(0, 7) === filterMonthYear);
-
-            const atrasadas = viagensDoMes.filter(v => v.atraso && v.atraso.isAtrasada).sort((a, b) => a.id.localeCompare(b.id));
-
-            const [year, month] = filterMonthYear.split('-');
-            const date = new Date(year, month - 1);
-            const mesFormatado = date.toLocaleDateString('pt-BR', { year: 'numeric', month: 'long' });
-
-            let html = `<h3>🚨 Relatório de Viagens Atrasadas - ${mesFormatado}</h3>`;
-            
-            if (atrasadas.length === 0) {
-                html += `<p style="text-align: center;">Nenhuma viagem atrasada registrada para o período selecionado.</p>`;
-                rel.innerHTML = html;
-                return;
-            }
-            
-            html += `<div class="mes-header">Viagens Atrasadas: ${atrasadas.length}</div>`;
-
-            atrasadas.forEach(viagem => {
-                const formattedDate = viagem.data.split('-').reverse().join('/');
-                const justificativa = viagem.atraso.justificativa;
-                const ultimoTrecho = viagem.trechos[viagem.trechos.length - 1];
-                const ultimoTrechoIndex = viagem.trechos.length - 1;
-                const config = ROTAS_CONFIG[viagem.rota][ultimoTrechoIndex];
-
-                html += `<div class="viagem-card-report atrasada">`;
-                html += `<h4>${formattedDate} | Rota: ${viagem.rota.toUpperCase()}</h4>`; 
-                
-                html += `<p style="margin-top: -10px; color: #dc3545; font-weight: bold;">Chegada Efetiva: ${ultimoTrecho.fim} (Meta: ${config.chegadaMeta} + ${config.toleranciaMin} min)</p>`;
-                
-                html += `<p><strong>Justificativa Atual:</strong> ${justificativa || 'Aguardando justificativa'}</p>`;
-                
-                html += `<div class="action-bar" style="margin-top: 10px;">`;
-                html += `<button class="btn-danger" style="padding: 8px 15px;" onclick="abrirJustificativaModal('${viagem.id}')">Justificar / Alterar</button>`; 
-                html += `<button class="btn-primary" style="padding: 8px 15px;" onclick="mostrarDetalhesViagem('${viagem.id}')">Ver Viagem Completa</button>`; 
-                html += `</div>`;
-
-                html += `</div>`;
-            });
-
-            rel.innerHTML = html;
-        }
-
-        function gerarRelatorio() {
-            const mesAno = document.getElementById('mesAno').value;
-            if (!mesAno) {
-                alert('Selecione o mês/ano.');
-                return;
-            }
-            
-            const [year, month] = mesAno.split('-').map(Number);
-            const rel = document.getElementById('relatorios');
-            rel.innerHTML = '';
-            
-            const hoursByDriver = {}; 
-
-            viagens.forEach(v => {
-                const vDate = new Date(v.data + 'T00:00:00'); 
-                
-                if (vDate.getFullYear() === year && vDate.getMonth() + 1 === month) {
-                    
-                    if (v.trechos && Array.isArray(v.trechos)) {
-                        v.trechos.forEach(trecho => {
-                            const driverName = trecho.motorista;
-                            const nightHours = trecho.horasNoturnas || 0; 
-                            
-                            if (driverName) {
-                                if (!hoursByDriver[driverName]) hoursByDriver[driverName] = [];
-                                hoursByDriver[driverName].push({ 
-                                    id: v.id, 
-                                    data: v.data, 
-                                    hours: trecho.horas, 
-                                    nightHours: nightHours,
-                                });
-                            }
-                        });
-                    }
-                }
-            });
-            
-            if (Object.keys(hoursByDriver).length === 0) {
-                rel.innerHTML = `<h3>Relatório Mensal de Horas (${month}/${year})</h3><p style="text-align: center;">Nenhuma viagem encontrada para o período selecionado.</p>`;
-                return;
-            }
-
-            for (let driver in hoursByDriver) {
-                let entries = hoursByDriver[driver];
-                
-                const aggregatedEntries = entries.reduce((acc, entry) => {
-                    const key = entry.id; 
-                    if (!acc[key]) {
-                        acc[key] = { 
-                            id: entry.id, 
-                            data: entry.data, 
-                            totalHours: 0, 
-                            totalNightHours: 0 
-                        };
-                    }
-                    acc[key].totalHours += entry.hours;
-                    acc[key].totalNightHours += entry.nightHours; 
-                    return acc;
-                }, {});
-
-                const finalEntries = Object.values(aggregatedEntries);
-
-                finalEntries.sort((a, b) => new Date(a.data + 'T00:00:00') - new Date(b.data + 'T00:00:00')); 
-                let total = finalEntries.reduce((sum, e) => sum + e.totalHours, 0);
-                let totalNight = finalEntries.reduce((sum, e) => sum + e.totalNightHours, 0); 
-                
-                const table = document.createElement('table');
-                const caption = document.createElement('caption');
-                caption.textContent = `Tabela de Horas Trabalhadas - ${driver} (${month}/${year})`;
-                table.appendChild(caption);
-                
-                const thead = document.createElement('thead');
-                const trh = document.createElement('tr');
-                ['Data', 'Horas Totais (h)', 'Horas Noturnas (h)', 'Ações'].forEach(headerText => {
-                    const th = document.createElement('th'); th.textContent = headerText; trh.appendChild(th);
-                });
-                thead.appendChild(trh);
-                table.appendChild(thead);
-                
-                const tbody = document.createElement('tbody');
-                finalEntries.forEach(e => {
-                    const tr = document.createElement('tr');
-                    const formattedDate = e.data.split('-').reverse().join('/');
-                    
-                    const td1 = document.createElement('td'); td1.textContent = formattedDate; 
-                    const td2 = document.createElement('td'); td2.textContent = totalHoursToDecimal(e.totalHours);
-                    const td3 = document.createElement('td'); 
-                    td3.textContent = totalHoursToDecimal(e.totalNightHours);
-                    td3.className = 'night-hours'; 
-                    
-                    const td4 = document.createElement('td');
-                    const detailButton = document.createElement('button');
-                    detailButton.textContent = 'Detalhes';
-                    detailButton.className = 'btn-primary';
-                    detailButton.style.padding = '5px 10px';
-                    detailButton.setAttribute('onclick', `mostrarDetalhesViagem('${e.id}', '${driver}')`); 
-                    td4.appendChild(detailButton);
-                    
-                    tr.appendChild(td1);
-                    tr.appendChild(td2);
-                    tr.appendChild(td3);
-                    tr.appendChild(td4);
-                    tbody.appendChild(tr);
-                });
-                table.appendChild(tbody);
-                
-                const tfoot = document.createElement('tfoot');
-                
-                const trfTotal = document.createElement('tr');
-                const tdf1Total = document.createElement('td'); tdf1Total.textContent = 'TOTAL GERAL';
-                tdf1Total.style.fontWeight = 'bold';
-                const tdf2Total = document.createElement('td'); tdf2Total.textContent = totalHoursToDecimal(total);
-                tdf2Total.style.fontWeight = 'bold';
-                const tdf3Total = document.createElement('td'); tdf3Total.textContent = totalHoursToDecimal(totalNight);
-                tdf3Total.style.fontWeight = 'bold';
-                tdf3Total.className = 'night-hours';
-                const tdf4Total = document.createElement('td'); 
-                
-                trfTotal.appendChild(tdf1Total);
-                trfTotal.appendChild(tdf2Total);
-                trfTotal.appendChild(tdf3Total);
-                trfTotal.appendChild(tdf4Total);
-                tfoot.appendChild(trfTotal);
-
-                table.appendChild(tfoot);
-                
-                rel.appendChild(table);
-            }
-        }
-
-        function downloadFile(content, fileName, contentType) {
-            const a = document.createElement("a");
-            const file = new Blob([content], { type: contentType });
-            a.href = URL.createObjectURL(file);
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(a.href);
-        }
-
-        function exportData() {
-            if (viagens.length === 0 && motoristas.length === 0) {
-                alert("Não há dados DEV para exportar.");
-                return;
-            }
-
-            const dataToExport = {
-                motoristas: motoristas,
-                viagens: viagens,
-                data_source: 'VIAGENS_PRO_DEV_FIREBASE' 
-            };
-            
-            const jsonContent = JSON.stringify(dataToExport, null, 2);
-            
-            const date = new Date().toISOString().slice(0, 10);
-            const fileName = `backup_viagens_DEV_${date}.json`;
-            
-            downloadFile(jsonContent, fileName, 'application/json');
-            alert(`Dados DEV exportados com sucesso! Arquivo: ${fileName}`);
-        }
-
-        async function importData() {
-            const fileInput = document.getElementById('importFile');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                alert("Por favor, selecione um arquivo JSON para importar.");
-                return;
-            }
-            
-            if (!confirm("⚠️ ATENÇÃO: A importação irá SOBRESCREVER todos os dados DEV no Firebase. Deseja continuar com a importação?")) {
-                return; 
-            }
-
-            const reader = new FileReader();
-            
-            reader.onload = async function(event) {
-                try {
-                    const importedData = JSON.parse(event.target.result);
-                    
-                    if (importedData.motoristas && Array.isArray(importedData.motoristas) && 
-                        importedData.viagens && Array.isArray(importedData.viagens)) {
-                        
-                        motoristas = importedData.motoristas;
-                        viagens = importedData.viagens;
-                        
-                        // Garante que a estrutura de dados esteja correta para o Firebase
-                        viagens.forEach(v => {
-                            if (!v.id && v.data && v.trechos && v.trechos[0]) {
-                                v.id = createViagemId(v.data, v.trechos[0].inicio);
-                            }
-                            if (v.data) {
-                                const dateObj = new Date(v.data + 'T00:00:00');
-                                v.day = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' }).toLowerCase();
-                            }
-                            if (!v.atraso) {
-                                v.atraso = { isAtrasada: false, justificativa: '' };
-                            }
-                        });
-
-                        await saveData(); // Salva no Firebase
-                        
-                        updateMotoristasList();
-                        document.getElementById('relatorios').innerHTML = '<p style="text-align: center; color: #6c757d;">Dados importados para o Firebase. Gere um novo relatório para visualização.</p>';
-                        document.getElementById('importFileLabel').textContent = 'Nenhum arquivo escolhido';
-                        document.getElementById('importFile').value = '';
-
-                        alert(`Dados DEV importados para o Firebase com sucesso! ${viagens.length} viagens e ${motoristas.length} motoristas foram carregados.`);
-                    } else {
-                        throw new Error("O arquivo JSON não possui a estrutura esperada (motoristas e viagens).");
-                    }
-                } catch (e) {
-                    alert("Erro ao processar o arquivo. Verifique se é um arquivo JSON válido e com a estrutura correta. Erro: " + e.message);
-                }
-            };
-            
-            reader.onerror = function() {
-                alert("Erro ao ler o arquivo.");
-            };
-
-            reader.readAsText(file);
-        }
-
-        function updateFileName() {
-            const fileInput = document.getElementById('importFile');
-            const fileLabel = document.getElementById('importFileLabel');
-            if (fileInput.files.length > 0) {
-                fileLabel.textContent = fileInput.files[0].name;
-                fileLabel.style.borderColor = '#28a745';
-            } else {
-                fileLabel.textContent = 'Nenhum arquivo escolhido';
-                fileLabel.style.borderColor = '#ced4da';
-            }
-        }
-        
-        function setupAutoFill(endId, startId) {
-            const endInput = document.getElementById(endId);
-            const startInput = document.getElementById(startId);
-            
-            if (endInput && startInput) {
-                endInput.addEventListener('change', function() {
-                    startInput.value = this.value;
-                    if (startId === 'inicio2') { 
-                         const fim2Input = document.getElementById('fim2');
-                         if (fim2Input) {
-                             fim2Input.dispatchEvent(new Event('change'));
-                         }
-                    }
-                    // Atualiza o ID da Viagem em Edição se o início do Trecho 1 mudar
-                    if (startId === 'inicio1' && document.getElementById('viagemEmEdicaoId').value) {
-                         const data = document.getElementById('dataViagem').value;
-                         const novoViagemId = createViagemId(data, this.value);
-                         document.getElementById('viagemEmEdicaoId').value = novoViagemId; 
-                         document.getElementById('mensagemEdicao').textContent = `EDITANDO VIAGEM de ${data.split('-').reverse().join('/')} (Início Trecho 1: ${this.value}).`;
-                    }
-                });
-            }
         }
 
         setupAutoFill('fim1', 'inicio2');
         setupAutoFill('fim2', 'inicio3');
         
         // --- INICIALIZAÇÃO ---
+        setupEventListeners(); // LIGA TODOS OS BOTÕES
         loadData();
     </script>
 </body>
