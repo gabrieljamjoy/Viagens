@@ -663,14 +663,7 @@
             return 'Destino Não Definido';
         }
         
-        function limparFormularioViagem() {
-            document.getElementById('cadastro-viagens').reset();
-            document.getElementById('viagemEmEdicaoId').value = '';
-            document.getElementById('mensagemEdicao').textContent = '';
-            isEditing = false;
-            updateFormLabels(); 
-        }
-        
+        // FUNÇÃO ATUALIZADA PARA GARANTIR A LIMPEZA TOTAL
         function limparFormularioViagem() {
             const formViagem = document.getElementById('cadastro-viagens');
             
@@ -682,8 +675,9 @@
             document.getElementById('mensagemEdicao').textContent = '';
             isEditing = false;
             
-            // 3. Limpa explicitamente os campos de Tempo/Motorista para garantir
+            // 3. Limpa explicitamente os campos de Tempo/Motorista e Data para garantir
             document.getElementById('dataViagem').value = '';
+            document.getElementById('rota').value = ''; // Limpa a rota para garantir que o trecho 3 suma
             document.getElementById('motorista1').value = '';
             document.getElementById('inicio1').value = '';
             document.getElementById('fim1').value = '';
@@ -694,8 +688,20 @@
             document.getElementById('inicio3').value = '';
             document.getElementById('fim3').value = '';
 
-            // 4. Garante que as legendas e o campo do trecho 3 estejam corretos
+            // 4. Garante que as legendas e o campo do trecho 3 estejam corretos (oculta o trecho 3)
             updateFormLabels(); 
+        }
+        
+        function updateFileName() {
+            const fileInput = document.getElementById('importFile');
+            const fileLabel = document.getElementById('importFileLabel');
+            if (fileInput.files.length > 0) {
+                fileLabel.textContent = fileInput.files[0].name;
+                fileLabel.style.backgroundColor = '#d4edda'; 
+            } else {
+                fileLabel.textContent = 'Nenhum arquivo escolhido';
+                fileLabel.style.backgroundColor = '#f8f9fa';
+            }
         }
 
         // ----------------------------------------------------------------------
@@ -722,7 +728,6 @@
                 updateMotoristasList(); 
             } catch (e) {
                 console.error("Erro ao carregar dados:", e);
-                // Mantemos o alerta caso o usuário tenha um erro de API/Credenciais
                 // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); 
             }
         }
@@ -832,7 +837,7 @@
 
             if (await saveDataToFirestore()) {
                 alert(isEditing ? "Viagem atualizada com sucesso!" : "Viagem salva com sucesso!");
-                limparFormularioViagem();
+                limparFormularioViagem(); // <-- CHAMA A FUNÇÃO DE LIMPEZA APÓS O SUCESSO
             }
         }
 
@@ -850,7 +855,6 @@
             updateFormLabels(); 
 
             // Preenche os campos dos trechos
-            // Garantir que a lista de motoristas esteja atualizada (chamado em loadData)
             viagem.trechos.forEach((trecho, index) => {
                 const num = index + 1;
                 const motoristaSelect = document.getElementById(`motorista${num}`);
@@ -1122,4 +1126,3 @@
     </script>
 </body>
 </html>
-
