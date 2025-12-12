@@ -671,16 +671,31 @@
             updateFormLabels(); 
         }
         
-        function updateFileName() {
-            const fileInput = document.getElementById('importFile');
-            const fileLabel = document.getElementById('importFileLabel');
-            if (fileInput.files.length > 0) {
-                fileLabel.textContent = fileInput.files[0].name;
-                fileLabel.style.backgroundColor = '#d4edda'; 
-            } else {
-                fileLabel.textContent = 'Nenhum arquivo escolhido';
-                fileLabel.style.backgroundColor = '#f8f9fa';
-            }
+        function limparFormularioViagem() {
+            const formViagem = document.getElementById('cadastro-viagens');
+            
+            // 1. Usa o reset nativo do formulário
+            formViagem.reset(); 
+            
+            // 2. Limpa variáveis de controle de edição
+            document.getElementById('viagemEmEdicaoId').value = '';
+            document.getElementById('mensagemEdicao').textContent = '';
+            isEditing = false;
+            
+            // 3. Limpa explicitamente os campos de Tempo/Motorista para garantir
+            document.getElementById('dataViagem').value = '';
+            document.getElementById('motorista1').value = '';
+            document.getElementById('inicio1').value = '';
+            document.getElementById('fim1').value = '';
+            document.getElementById('motorista2').value = '';
+            document.getElementById('inicio2').value = '';
+            document.getElementById('fim2').value = '';
+            document.getElementById('motorista3').value = '';
+            document.getElementById('inicio3').value = '';
+            document.getElementById('fim3').value = '';
+
+            // 4. Garante que as legendas e o campo do trecho 3 estejam corretos
+            updateFormLabels(); 
         }
 
         // ----------------------------------------------------------------------
@@ -1107,3 +1122,4 @@
     </script>
 </body>
 </html>
+
