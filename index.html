@@ -441,7 +441,7 @@
             </fieldset>
 
             <div class="action-bar">
-                <button id="btnSalvarViagem" class="btn-success">Salvar Viagem</button>
+                <button id="btnSalvarViagem" class="btn-success" onclick="addViagem()">Salvar Viagem</button>
                 <button id="btnLimparViagem" class="btn-secondary">Cancelar Edição / Limpar</button>
             </div>
         </div>
@@ -784,7 +784,7 @@
                     updateMotoristasList();
                     document.getElementById('nomeMotorista').value = '';
                 }
-            } else if (motoristasCadastrados.includes(nome)) {
+            } else if (motoristasCadastradas.includes(nome)) {
                 alert("Motorista já cadastrado.");
             }
         }
@@ -1125,7 +1125,7 @@
         }
 
         // ----------------------------------------------------------------------
-        // 6. LIGAÇÃO DE EVENTOS DO HTML AO ESCOPO DO MÓDULO (ATUALIZADO)
+        // 6. LIGAÇÃO DE EVENTOS DO HTML AO ESCOPO DO MÓDULO 
         // ----------------------------------------------------------------------
         
         function setupFormEventListeners() {
@@ -1134,10 +1134,8 @@
             if (btnAddMotorista) btnAddMotorista.addEventListener('click', addMotorista);
 
             // Cadastro de Viagens
-            const btnSalvarViagem = document.getElementById('btnSalvarViagem');
+            // REMOVIDO: btnSalvarViagem (substituído por onclick no HTML)
             const btnLimparViagem = document.getElementById('btnLimparViagem');
-            
-            if (btnSalvarViagem) btnSalvarViagem.addEventListener('click', addViagem);
             if (btnLimparViagem) btnLimparViagem.addEventListener('click', limparFormularioViagem);
 
             // Outros Listeners...
@@ -1177,7 +1175,10 @@
         window.editarViagem = editarViagem;
         window.excluirViagem = excluirViagem;
         window.updateFormLabels = updateFormLabels; 
-        window.updateFileName = updateFileName; // Necessário para a label de importação
+        window.updateFileName = updateFileName; 
+        
+        // EXPOSIÇÃO DA FUNÇÃO DE SALVAMENTO DE VIAGEM
+        window.addViagem = addViagem;
 
         // --- FUNÇÕES DE AUTO-PREENCHIMENTO ---
         setupAutoFill('fim1', 'inicio2');
