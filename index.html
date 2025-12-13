@@ -62,7 +62,17 @@
             font-weight: 500;
             color: #555;
         }
-        input[type="date"], input[type="month"], select, input[type="text"] {
+        input[type="date"], input[type="month"], select, input[type="time"] { /* ATUALIZADO AQUI */
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        /* Garantindo que o input[type="text"] no cadastro de motorista continue formatado */
+        input[type="text"] {
             width: 100%;
             padding: 10px;
             margin-top: 5px;
@@ -385,12 +395,10 @@
                     </div>
                     <div>
                         <label>Início da Jornada:</label>
-                        <input type="text" id="inicio1" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="inicio1" required> </div>
                     <div>
                         <label>Fim da Jornada:</label>
-                        <input type="text" id="fim1" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="fim1" required> </div>
                 </div>
             </fieldset>
 
@@ -403,12 +411,10 @@
                     </div>
                     <div>
                         <label>Início da Jornada:</label>
-                        <input type="text" id="inicio2" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="inicio2" required> </div>
                     <div>
                         <label>Fim da Jornada:</label>
-                        <input type="text" id="fim2" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="fim2" required> </div>
                 </div>
             </fieldset>
 
@@ -421,12 +427,10 @@
                     </div>
                     <div>
                         <label>Início da Jornada:</label>
-                        <input type="text" id="inicio3" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="inicio3" required> </div>
                     <div>
                         <label>Fim da Jornada:</label>
-                        <input type="text" id="fim3" required pattern="^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM">
-                    </div>
+                        <input type="time" id="fim3" required> </div>
                 </div>
             </fieldset>
 
@@ -734,7 +738,7 @@
                 // ESSA CHAMADA GARANTE QUE A LISTA SEJA ATUALIZADA APÓS O CARREGAMENTO
                 updateMotoristasList(); 
                 
-                // NOVO: Chama updateFormLabels para garantir o estado inicial do Trecho 3
+                // Chamada para garantir o estado inicial do Trecho 3
                 updateFormLabels(); 
                 
             } catch (e) {
@@ -779,10 +783,9 @@
         }
         
         async function addViagem() {
-            // VALIDAÇÃO: Certifique-se de que a validação do pattern de HH:MM ocorreu
+            // VALIDAÇÃO: Permite que o navegador lide com a validação do tipo 'time'
             const form = document.getElementById('cadastro-viagens');
             if (!form.reportValidity()) {
-                // Se a validação do HTML falhar (ex: pattern de horário), interrompe
                 return; 
             }
             
@@ -1133,7 +1136,7 @@
         // ----------------------------------------------------------------------
         window.editarViagem = editarViagem;
         window.excluirViagem = excluirViagem;
-        window.updateFormLabels = updateFormLabels; // Garante que a função está no escopo global para o onchange
+        window.updateFormLabels = updateFormLabels; 
 
         // --- FUNÇÕES DE AUTO-PREENCHIMENTO ---
         setupAutoFill('fim1', 'inicio2');
