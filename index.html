@@ -679,7 +679,7 @@
             const formViagem = document.getElementById('cadastro-viagens');
             
             // 1. Resetar o formulário completo
-            formViagem.reset(); 
+            if (formViagem) formViagem.reset(); 
             
             // 2. Limpar variáveis de controle de edição
             document.getElementById('viagemEmEdicaoId').value = '';
@@ -771,7 +771,7 @@
         }
 
         // ----------------------------------------------------------------------
-        // 5. FUNÇÕES DE AÇÃO (ATUALIZADA)
+        // 5. FUNÇÕES DE AÇÃO (DIAGNÓSTICO INSERIDO)
         // ----------------------------------------------------------------------
         
         async function addMotorista() {
@@ -789,19 +789,23 @@
             }
         }
         
-        // FUNÇÃO DE SALVAMENTO DE VIAGEM REFORÇADA
+        // FUNÇÃO DE SALVAMENTO DE VIAGEM REFORÇADA COM DIAGNÓSTICO
         async function addViagem() {
+            // DIAGNÓSTICO: Verifica se a função foi acionada
+            console.log("Tentativa de salvar nova viagem..."); 
+            
             const form = document.getElementById('cadastro-viagens');
             
             // 1. Usa reportValidity() para exibir as mensagens de erro nativas do HTML.
-            // Se falhar, interrompe o JS
-            if (!form.reportValidity()) {
+            if (!form || !form.reportValidity()) {
+                console.warn("Validação HTML falhou ou formulário não encontrado.");
                 return; 
             }
             
             const rota = document.getElementById('rota').value;
             const dataViagem = document.getElementById('dataViagem').value;
             
+            // Checagem redundante (o reportValidity() já deveria pegar isso)
             if (!rota) return alert("Selecione a Rota.");
             if (!dataViagem) return alert("Selecione a Data da Viagem.");
             
@@ -844,7 +848,6 @@
                 const fim3 = document.getElementById('fim3').value;
                 
                 if (!motorista3 || !inicio3 || !fim3) {
-                    // Mensagem específica para o usuário
                     return alert("A rota de Porto Seguro exige o preenchimento de todos os campos do Trecho 3 (Motorista, Início e Fim).");
                 }
                 
@@ -882,7 +885,9 @@
                 viagensCadastradas.push(novaViagem);
             }
 
-            if (await saveDataToFirestore()) {
+            // Tenta salvar e verifica o resultado
+            const sucesso = await saveDataToFirestore();
+            if (sucesso) {
                 alert(isEditing ? "Viagem atualizada com sucesso!" : "Viagem salva com sucesso!");
                 limparFormularioViagem(); 
             }
@@ -1110,23 +1115,32 @@
 
         function setupAutoFill(sourceId, targetId) {
             document.getElementById(sourceId).addEventListener('change', (e) => {
-                document.getElementById(targetId).value = e.target.value;
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.value = e.target.value;
+                } else {
+                    console.error(`Elemento de destino não encontrado: ${targetId}`);
+                }
             });
         }
 
         // ----------------------------------------------------------------------
-        // 6. LIGAÇÃO DE EVENTOS DO HTML AO ESCOPO DO MÓDULO (CORREÇÃO FINAL DE ESCOPO)
+        // 6. LIGAÇÃO DE EVENTOS DO HTML AO ESCOPO DO MÓDULO (ATUALIZADO)
         // ----------------------------------------------------------------------
         
-        function setupEventListeners() {
+        function setupFormEventListeners() {
             // Cadastro de Motoristas
-            document.getElementById('btnAddMotorista').addEventListener('click', addMotorista);
+            const btnAddMotorista = document.getElementById('btnAddMotorista');
+            if (btnAddMotorista) btnAddMotorista.addEventListener('click', addMotorista);
 
             // Cadastro de Viagens
-            document.getElementById('btnSalvarViagem').addEventListener('click', addViagem);
-            document.getElementById('btnLimparViagem').addEventListener('click', limparFormularioViagem);
+            const btnSalvarViagem = document.getElementById('btnSalvarViagem');
+            const btnLimparViagem = document.getElementById('btnLimparViagem');
             
-            // Relatórios
+            if (btnSalvarViagem) btnSalvarViagem.addEventListener('click', addViagem);
+            if (btnLimparViagem) btnLimparViagem.addEventListener('click', limparFormularioViagem);
+
+            // Outros Listeners...
             document.getElementById('btnGerarRelatorioHoras').addEventListener('click', gerarRelatorioHoras);
             document.getElementById('btnGerarRelatorioGeral').addEventListener('click', gerarRelatorioGeralViaForm);
             document.getElementById('btnGerarRelatorioAtrasos').addEventListener('click', gerarRelatorioAtrasosViaForm);
@@ -1158,18 +1172,19 @@
 
         
         // ----------------------------------------------------------------------
-        // 7. EXPOR FUNÇÕES PARA CHAMADAS ONCLICK DO HTML GERADO
+        // 7. EXPOR FUNÇÕES PARA CHAMADAS ONCLICK DO HTML GERADO E INICIALIZAÇÃO
         // ----------------------------------------------------------------------
         window.editarViagem = editarViagem;
         window.excluirViagem = excluirViagem;
         window.updateFormLabels = updateFormLabels; 
+        window.updateFileName = updateFileName; // Necessário para a label de importação
 
         // --- FUNÇÕES DE AUTO-PREENCHIMENTO ---
         setupAutoFill('fim1', 'inicio2');
         setupAutoFill('fim2', 'inicio3');
         
         // --- INICIALIZAÇÃO E CHAMADAS FINAIS ---
-        setupEventListeners(); 
+        setupFormEventListeners(); 
         loadData(); // CARREGA OS DADOS SALVOS DO FIREBASE NO INÍCIO DA PÁGINA
         
     </script>
