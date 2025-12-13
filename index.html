@@ -677,7 +677,7 @@
             
             // 3. Limpa explicitamente os campos de Tempo/Motorista e Data para garantir
             document.getElementById('dataViagem').value = '';
-            document.getElementById('rota').value = ''; // Limpa a rota para garantir que o trecho 3 suma
+            document.getElementById('rota').value = ''; // GARANTE QUE O SELETOR DE ROTA ESTEJA VAZIO
             document.getElementById('motorista1').value = '';
             document.getElementById('inicio1').value = '';
             document.getElementById('fim1').value = '';
@@ -837,7 +837,7 @@
 
             if (await saveDataToFirestore()) {
                 alert(isEditing ? "Viagem atualizada com sucesso!" : "Viagem salva com sucesso!");
-                limparFormularioViagem(); // <-- CHAMA A FUNÇÃO DE LIMPEZA APÓS O SUCESSO
+                limparFormularioViagem(); 
             }
         }
 
@@ -852,6 +852,7 @@
             document.getElementById('dataViagem').value = viagem.data;
             document.getElementById('rota').value = viagem.rota;
             
+            // CORREÇÃO: Chama updateFormLabels para garantir que o fieldset3 seja exibido se a rota for de 3 trechos
             updateFormLabels(); 
 
             // Preenche os campos dos trechos
@@ -981,7 +982,7 @@
         }
 
 
-        // Substitui o placeholder e implementa a visualização em cards
+        // Implementa a visualização em cards
         async function gerarRelatorioGeralViaForm() {
             const relatoriosDiv = document.getElementById('relatorios');
             relatoriosDiv.innerHTML = ''; // Limpa relatórios anteriores
