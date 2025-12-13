@@ -663,7 +663,7 @@
             return 'Destino Não Definido';
         }
         
-        // FUNÇÃO ATUALIZADA PARA GARANTIR A LIMPEZA TOTAL E FORÇADA
+        // FUNÇÃO REFORÇADA PARA GARANTIR A LIMPEZA TOTAL
         function limparFormularioViagem() {
             const formViagem = document.getElementById('cadastro-viagens');
             
@@ -733,6 +733,10 @@
                 }
                 // ESSA CHAMADA GARANTE QUE A LISTA SEJA ATUALIZADA APÓS O CARREGAMENTO
                 updateMotoristasList(); 
+                
+                // NOVO: Chama updateFormLabels para garantir o estado inicial do Trecho 3
+                updateFormLabels(); 
+                
             } catch (e) {
                 console.error("Erro ao carregar dados:", e);
                 // alert("Erro ao carregar dados do Firebase. Verifique as credenciais e regras de segurança."); 
@@ -775,6 +779,13 @@
         }
         
         async function addViagem() {
+            // VALIDAÇÃO: Certifique-se de que a validação do pattern de HH:MM ocorreu
+            const form = document.getElementById('cadastro-viagens');
+            if (!form.reportValidity()) {
+                // Se a validação do HTML falhar (ex: pattern de horário), interrompe
+                return; 
+            }
+            
             const rota = document.getElementById('rota').value;
             if (!rota) return alert("Selecione a Rota.");
             
@@ -859,6 +870,7 @@
             document.getElementById('dataViagem').value = viagem.data;
             document.getElementById('rota').value = viagem.rota;
             
+            // CORREÇÃO: Chama updateFormLabels para garantir que o fieldset3 seja exibido se a rota for de 3 trechos
             updateFormLabels(); 
 
             // Preenche os campos dos trechos
@@ -1121,7 +1133,7 @@
         // ----------------------------------------------------------------------
         window.editarViagem = editarViagem;
         window.excluirViagem = excluirViagem;
-
+        window.updateFormLabels = updateFormLabels; // Garante que a função está no escopo global para o onchange
 
         // --- FUNÇÕES DE AUTO-PREENCHIMENTO ---
         setupAutoFill('fim1', 'inicio2');
@@ -1130,6 +1142,7 @@
         // --- INICIALIZAÇÃO E CHAMADAS FINAIS ---
         setupEventListeners(); 
         loadData(); // CARREGA OS DADOS SALVOS DO FIREBASE NO INÍCIO DA PÁGINA
+        
     </script>
 </body>
 </html>
